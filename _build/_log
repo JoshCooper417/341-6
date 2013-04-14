@@ -62,12 +62,20 @@
 # Target: opt.cmo, tags: { byte, compile, extension:ml, file:opt.ml, implem, ocaml, quiet }
 /usr/local/bin/ocamlc.opt -c -o opt.cmo opt.ml
 + /usr/local/bin/ocamlc.opt -c -o opt.cmo opt.ml
-File "opt.ml", line 118, characters 6-13:
+File "opt.ml", line 74, characters 16-29:
+Warning 26: unused variable var_entry_opt.
+File "opt.ml", line 136, characters 6-13:
 Warning 26: unused variable context.
 File "opt.ml", line 44, characters 17-278:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 Index (_, _)
+File "opt.ml", line 72, characters 49-339:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Index (_, _)|Path _)
+File "opt.ml", line 38, characters 5-6:
+Warning 11: this match case is unused.
 # Target: lexer.mll, tags: { extension:mll, file:lexer.mll, lexer, ocaml, ocamllex, quiet }
 /usr/local/bin/ocamllex.opt -q lexer.mll # cached
 # Target: lexer.ml.depends, tags: { extension:ml, file:lexer.ml, ocaml, ocamldep, quiet }
@@ -177,12 +185,20 @@ Index (_, _)
 # Target: opt.cmx, tags: { compile, extension:cmx, extension:ml, file:opt.cmx, file:opt.ml, implem, native, ocaml, quiet }
 /usr/local/bin/ocamlopt.opt -c -o opt.cmx opt.ml
 + /usr/local/bin/ocamlopt.opt -c -o opt.cmx opt.ml
-File "opt.ml", line 118, characters 6-13:
+File "opt.ml", line 74, characters 16-29:
+Warning 26: unused variable var_entry_opt.
+File "opt.ml", line 136, characters 6-13:
 Warning 26: unused variable context.
 File "opt.ml", line 44, characters 17-278:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 Index (_, _)
+File "opt.ml", line 72, characters 49-339:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Index (_, _)|Path _)
+File "opt.ml", line 38, characters 5-6:
+Warning 11: this match case is unused.
 # Target: occ.cmx, tags: { compile, extension:cmx, extension:ml, file:occ.cmx, file:occ.ml, implem, native, ocaml, quiet }
 /usr/local/bin/ocamlopt.opt -c -o occ.cmx occ.ml
 # Target: Oconfig.ml.depends, tags: { extension:ml, file:Oconfig.ml, ocaml, ocamldep, quiet }
@@ -200,5 +216,5 @@ Index (_, _)
 # Target: main.native, tags: { dont_link_with, extension:native, file:main.native, link, native, ocaml, program, quiet }
 /usr/local/bin/ocamlopt.opt unix.cmxa str.cmxa LibUtil.cmx Oconfig.cmx assert.cmx ast.cmx range.cmx parser.cmx lexer.cmx astlib.cmx x86.cmx ll.cmx ctxt.cmx cunit.cmx platform.cmx lllib.cmx opt.cmx tctxt.cmx tc.cmx phase1.cmx phase2.cmx occ.cmx gradedtests.cmx providedtests.cmx driver.cmx main.cmx -o main.native
 + /usr/local/bin/ocamlopt.opt unix.cmxa str.cmxa LibUtil.cmx Oconfig.cmx assert.cmx ast.cmx range.cmx parser.cmx lexer.cmx astlib.cmx x86.cmx ll.cmx ctxt.cmx cunit.cmx platform.cmx lllib.cmx opt.cmx tctxt.cmx tc.cmx phase1.cmx phase2.cmx occ.cmx gradedtests.cmx providedtests.cmx driver.cmx main.cmx -o main.native
-ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic) not allowed in code signed PIE, but used in _caml_program from /var/folders/g5/jcg10xnn5k5c7rkmyhrbjv9m0000gn/T/camlstartupf0b372.o. To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie
+ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic) not allowed in code signed PIE, but used in _caml_program from /var/folders/g5/jcg10xnn5k5c7rkmyhrbjv9m0000gn/T/camlstartupf89a8c.o. To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie
 # Compilation successful.

@@ -31,10 +31,10 @@ let rec optimize_exp (exp: Range.t exp)(context:ctxt) : Range.t exp =
     | Const const -> exp
     | This _ -> exp
     | LhsOrCall  lhs_or_call -> failwith ""(* left-hand sides or calls *)
-  (*   | New of typ * 'a exp * 'a id * 'a exp -> failwith ""(\* new array creation *\) *)
-  (*   | Ctor of ('a * cid) * 'a exp list-> failwith "" *)
-  (*   | Binop of 'a binop * 'a exp * 'a exp -> failwith ""(\* binary arithmetic *\) *)
-  (*   | Unop of 'a unop * 'a exp-> failwith "" (\* unary arithmetic *\) *)
+    | New (typ, exp1, id, exp2) -> failwith ""(* new array creation *)
+    | Ctor (cid, elist)-> failwith ""
+    | Binop (bop, e1, e2)-> failwith ""(* binary arithmetic *)
+    | Unop (uop, exp)-> failwith "" (* unary arithmetic *)
     |_ -> failwith ""
 end
 
@@ -67,49 +67,67 @@ and optimize_call (call:Range.t call)(context:ctxt) :Range.t call =
 			      PathMethod(new_path, new_elist)
   end 
 
-and work_stmt (stmt: Range.t stmt)(context:ctxt) : Range.t stmt =
+and work_stmt (stmt: Range.t stmt)(context:ctxt) : Range.t stmt*ctxt =
   begin match stmt with
-	      | Assign (lhs,exp) -> let new_lhs_or_call = optimize_lhs_or_call (Lhs lhs) context in 
+	      | Assign (lhs,exp) ->  let new_context =  begin match lhs with
+		                         |Var id -> try  
+						      let var_entry_opt = Some(List.assoc id context) in
+						      List.remove_assoc id context
+					       	   
+				                    with Not_found -> context
+					  |_-> context
+	                              end in
+		                    let new_lhs_or_call = optimize_lhs_or_call (Lhs lhs) context in 
 				    let new_exp = optimize_exp exp context in
 				    let new_lhs =  begin match new_lhs_or_call with
 				                | Lhs l -> l 
                                                 |_-> failwith "expected a path"
 			                      end in
-				    (Assign(new_lhs, new_exp))						
-	      | Scall (call) -> (Scall(optimize_call call context))
+				    ((Assign(new_lhs, new_exp)), new_context)						
+	      | Scall (call) -> ((Scall(optimize_call call context)), context)
 	      | Fail (exp) ->   let new_exp = optimize_exp exp context in 
-				(Fail(new_exp))
+				((Fail(new_exp)), context)
 	      | If (exp,stmt,stmt_opt) -> let new_exp = optimize_exp exp context in
-		                          let new_if_stmt = work_stmt stmt context in
+		                          let new_if_stmt = fst(work_stmt stmt context) in
 					  let new_else_stmt_opt = begin match stmt_opt with
 					                          | None -> None
-								  | Some so -> Some (work_stmt so context)
+								  | Some so -> Some (fst(work_stmt so context))
                                                                   end in
-					  If(new_exp, new_if_stmt, new_else_stmt_opt)
+					  (If(new_exp, new_if_stmt, new_else_stmt_opt), context)
 	      | IfNull (r,id,exp,stmt,stmt_opt) -> let new_exp = optimize_exp exp context in
-						   let new_stmt = work_stmt stmt context in
+						   let new_stmt = fst(work_stmt stmt context) in
 						   let new_stmt_opt = begin match stmt_opt with
 					                          | None -> None
-								  | Some so -> Some (work_stmt so context)
+								  | Some so -> Some  (fst(work_stmt so context))
                                                                   end in
-					           IfNull(r, id, new_exp, new_stmt, new_stmt_opt)
+					           (IfNull(r, id, new_exp, new_stmt, new_stmt_opt), context)
 	      | Cast (cid,id,exp,stmt,stmt_opt)-> let new_exp = optimize_exp exp context in
-						  let new_stmt = work_stmt stmt context in
+						  let new_stmt = fst(work_stmt stmt context) in
 						  let new_stmt_opt = begin match stmt_opt with
 					                          | None -> None
-								  | Some so -> Some (work_stmt so context)
+								  | Some so -> Some (fst(work_stmt so context))
                                                                   end in
-					           Cast(cid, id, new_exp, new_stmt, new_stmt_opt)
+					           (Cast(cid, id, new_exp, new_stmt, new_stmt_opt), context)
 	      | While (exp,stmt)-> let new_exp = optimize_exp exp context in
-				   let new_stmt = work_stmt stmt context in
-				   While(new_exp, new_stmt)
-	      | For (vdecls,opt_exp,stmt_opt,stmt)-> failwith "" (* for loop *)
-	      | Block block -> (Block(optimize_block block)) (* block *)
+				   let new_stmt = fst(work_stmt stmt context) in
+				   (While(new_exp, new_stmt), context)
+	      | For (vdecls,opt_exp,stmt_opt,stmt)-> let new_exp_opt =  begin match opt_exp with
+					                          | None -> None
+								  | Some eo -> Some (optimize_exp eo context)
+                                                                  end in
+						     let new_stmt_opt = begin match stmt_opt with
+					                          | None -> None
+								  | Some so -> Some (fst(work_stmt so context))
+                                                                  end in
+						     let new_stmt = fst(work_stmt stmt context) in
+						     
+						     (For (vdecls, new_exp_opt, new_stmt_opt, new_stmt), context)
+	      | Block block -> ((Block(optimize_block block)), context) (* block *)
 	      end
 and work_stmts (stmts: Range.t stmts)(context:ctxt) : Range.t stmts =
   begin match stmts with
-    | h::t-> let new_stmt = work_stmt h context in 
-	     (new_stmt)::(work_stmts t context)
+    | h::t-> let (new_stmt, new_context) = (work_stmt h context) in 
+	     (new_stmt)::(work_stmts t new_context) 
     | []->[]
     end
 
