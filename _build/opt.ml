@@ -67,9 +67,9 @@ let rec optimize_exp (exp: Range.t exp)(context:ctxt) : Range.t exp =
 										       	(Const (Cbool(Range.norange, (  true)))) 
 									        else (Const (Cbool(Range.norange, (  false)))) 
 									    | IOr  _-> Const(Cint(Range.norange, (Int32.logor i1 i2)))
-									    | Shl  _-> Const(Cint (Range.norange, (Int32.shift_left i1 i2)))
-									    | Shr  _->  Const(Cint (Range.norange, (Int32.shift_right_logical i1 i2)))
-									    | Sar  _-> Const(Cint (Range.norange, (Int32.shift_right i1 i2 )))
+									    | Shl  _-> Const(Cint (Range.norange, (Int32.shift_left i1 (Int32.to_int i2))))
+									    | Shr  _->  Const(Cint (Range.norange, (Int32.shift_right_logical i1 (Int32.to_int i2))))
+									    | Sar  _-> Const(Cint (Range.norange, (Int32.shift_right i1 (Int32.to_int i2))))
 						                           end
 						       |_-> Binop (bop, e1, e2)
 						     end
