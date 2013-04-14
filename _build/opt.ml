@@ -30,10 +30,55 @@ let rec optimize_exp (exp: Range.t exp)(context:ctxt) : Range.t exp =
   begin match exp with
     | Const const -> exp
     | This _ -> exp
-    | LhsOrCall  lhs_or_call -> failwith ""(* left-hand sides or calls *)
-    | New (typ, exp1, id, exp2) -> failwith ""(* new array creation *)
-    | Ctor (cid, elist)-> failwith ""
-    | Binop (bop, e1, e2)-> failwith ""(* binary arithmetic *)
+    | LhsOrCall lhs_or_call -> let new_lhsorcall = optimize_lhs_or_call lhs_or_call context in
+			       LhsOrCall new_lhsorcall
+    | New (typ, exp1, id, exp2) -> let new_e1 = optimize_exp exp1 context in
+				   let new_e2 = optimize_exp exp2 context in
+				   New (typ, new_e1, id, new_e2)
+    | Ctor (cid, elist)-> let opt_fun = fun(e) -> optimize_exp e context in 
+			  let new_elist = List.map opt_fun elist in
+			  Ctor (cid, new_elist)
+    | Binop (bop, e1, e2)->  let new_e1 = optimize_exp e1 context in
+			     let new_e2 = optimize_exp e2 context in
+			     begin match new_e1 with
+			      |Const c -> begin match c with
+				           | Cint(_, i1) -> begin match new_e2 with
+					               |Const (Cint(_,i2)) -> let cmpresult = Int32.compare i1 i2 in
+							                   begin match bop with
+							                    | Plus _-> Const(Cint (Range.norange, (Int32.add i1 i2)))
+									    | Times  _-> Const(Cint (Range.norange, (Int32.mul i1 i2)))
+									    | Minus  _-> Const(Cint (Range.norange, (Int32.sub i1 i2)))
+									    | Eq  _-> if (cmpresult = 0) then 
+										(Const (Cbool(Range.norange, (true)))) 
+									        else (Const (Cbool(Range.norange, (false)))) 
+									    | Neq  _-> if (cmpresult <> 0) then     
+										(Const (Cbool(Range.norange, (  true)))) 
+									        else (Const (Cbool(Range.norange, (  false)))) 
+									    | Lt  _-> if (cmpresult < 0) then
+										      	(Const (Cbool(Range.norange, (  true)))) 
+									        else (Const (Cbool(Range.norange, (  false)))) 
+									    | Lte _-> if (cmpresult <= 0) then 
+										       	(Const (Cbool(Range.norange, (  true)))) 
+									        else (Const (Cbool(Range.norange, (  false)))) 
+									    | Gt  _->  if (cmpresult > 0) then 
+										       	(Const (Cbool(Range.norange, (  true)))) 
+									        else (Const (Cbool(Range.norange, (  false)))) 
+									    | Gte  _-> if (cmpresult >= 0) then 
+										       	(Const (Cbool(Range.norange, (  true)))) 
+									        else (Const (Cbool(Range.norange, (  false)))) 
+									    | IOr  _-> Const(Cint(Range.norange, (Int32.logor i1 i2)))
+									    | Shl  _-> Const(Cint (Range.norange, (Int32.shift_left i1 i2)))
+									    | Shr  _->  Const(Cint (Range.norange, (Int32.shift_right_logical i1 i2)))
+									    | Sar  _-> Const(Cint (Range.norange, (Int32.shift_right i1 i2 )))
+						                           end
+						       |_-> Binop (bop, e1, e2)
+						     end
+					   | Cbool(_,b) -> failwith "unimpelemtn"
+					   | Cstring(_, s) -> failwith ""
+			                  end
+			      | _-> Binop (bop, e1, e2)
+			     end 
+			     
     | Unop (uop, exp)-> failwith "" (* unary arithmetic *)
     |_ -> failwith ""
 end
