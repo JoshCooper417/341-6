@@ -1,0 +1,11 @@
+# 1 "./tests/ourtest.oat"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "./tests/ourtest.oat"
+int program (int argc, string[] argv) {
+  int x = 1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1;
+  int y = x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x+x;
+  int z = y+y;
+  return z+z+z;
+  
+}

@@ -278,7 +278,7 @@ let work_prog_elt (gdecl:Range.t Ast.gdecl)  : (Range.t Ast.gdecl) =
        Ast.Gfdecl (typ_opt, id, args, new_block, new_exp_opt)
     | Ast.Gefdecl gefdecl -> gdecl
       (* Don't optimize external function *)
-    | Ast.Gcdecl (cid,cid_opt,fields,ctor,fdecls) -> gdecl (*NEED TO DO THIS*)
+    | Ast.Gcdecl (cid,cid_opt,fields,ctor,fdecls) -> gdecl (*WE NEED TO FIX THIS*)
   end
 
 let rec work_prog  (prog:Range.t Ast.prog): (Range.t Ast.prog) =
