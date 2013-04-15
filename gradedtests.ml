@@ -468,7 +468,7 @@ let file_tests : suite = [
 
 let manual_tests : suite = [
   GradedTest ("Implementation", 40, [
-    ("fields", file_test "fields.oat" "" "13");
+    ("nullcheck", file_test "nullcheck.oat" "" "42");
     ("manually", assert_fail);
   ]);
 
@@ -486,6 +486,6 @@ let manual_tests : suite = [
 ]
 
 let graded_tests : suite =   
-  (* typechecking_tests @ *)
-  (* file_tests @ *)
-  manual_tests
+  typechecking_tests @
+  file_tests @
+    manual_tests

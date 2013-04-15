@@ -1,14 +1,10 @@
-int global = 0;
-int global2 = 0;
-
 class Fields {
   int afield;
   int bfield;
   int cfield;
 
   new()() {
-  global = 4;
-    this.afield = method();
+    this.afield = 12;
   }
   
   Fields sumab() {
@@ -16,12 +12,6 @@ class Fields {
     return this;
   }
 };
-
-int method(){
-int x = global + 4;
- int y = x+x;
-return 4;
-}
 
 int program (int argc, string[] argv) {
   Fields fields = new Fields();

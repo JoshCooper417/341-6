@@ -1,0 +1,57 @@
+%Object = type { %_Object_vtable*, i8* }
+%_Object_vtable = type { {  }*, i8* (%Object*)* }
+declare i32* @oat_malloc(i32)
+declare { i32, [ 0 x i32 ] }* @oat_alloc_array(i32)
+declare void @oat_array_bounds_check(i32, i32)
+declare void @oat_abort(i32)
+declare void @print_bool(i1)
+declare void @print_int(i32)
+declare void @print_string(i8*)
+declare i32 @length_of_string(i8*)
+declare i8* @string_cat(i8*, i8*)
+declare i8* @string_of_int(i32)
+declare { i32, [ 0 x i32 ] }* @array_of_string(i8*)
+declare i8* @string_of_array({ i32, [ 0 x i32 ] }*)
+@_const_str652.str. = private unnamed_addr constant [ 7 x i8 ] c "Object\00", align 4
+@_const_str652 = alias bitcast([ 7 x i8 ]* @_const_str652.str. to i8*)@_Object_vtable651 = private constant %_Object_vtable {{  }* null, i8* (%Object*)* @_Object_get_name}, align 4
+define void @oat_init (){
+__fresh1843:
+  ret void
+}
+
+
+define i32 @program (i32 %argc5598, { i32, [ 0 x i8* ] }* %argv5596){
+__fresh1842:
+  %argc_slot5599 = alloca i32
+  store i32 %argc5598, i32* %argc_slot5599
+  %argv_slot5597 = alloca { i32, [ 0 x i8* ] }*
+  store { i32, [ 0 x i8* ] }* %argv5596, { i32, [ 0 x i8* ] }** %argv_slot5597
+  %vdecl_slot5600 = alloca i32
+  store i32 1, i32* %vdecl_slot5600
+  %vdecl_slot5601 = alloca i32
+  store i32 2, i32* %vdecl_slot5601
+  %vdecl_slot5602 = alloca i32
+  store i32 66, i32* %vdecl_slot5602
+  %lhs_or_call5603 = load i32* %vdecl_slot5602
+  ret i32 %lhs_or_call5603
+}
+
+
+define i8* @_Object_get_name (%Object* %_this1){
+__fresh1841:
+  %path5594 = getelementptr %Object* %_this1, i32 0, i32 1
+  %lhs_or_call5595 = load i8** %path5594
+  ret i8* %lhs_or_call5595
+}
+
+
+define %Object* @_Object_ctor (%Object* %_this1){
+__fresh1840:
+  %path5592 = getelementptr %Object* %_this1, i32 0, i32 1
+  store i8* @_const_str652, i8** %path5592
+  %vt_slot5593 = getelementptr %Object* %_this1, i32 0, i32 0
+  store %_Object_vtable* @_Object_vtable651, %_Object_vtable** %vt_slot5593
+  ret %Object* %_this1
+}
+
+
