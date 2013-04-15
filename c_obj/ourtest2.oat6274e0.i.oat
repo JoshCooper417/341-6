@@ -1,0 +1,13 @@
+# 1 "./tests/ourtest2.oat"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "./tests/ourtest2.oat"
+int program (int argc, string[] argv) {
+  bool x = true;
+  int y =5;
+  if(x & x){
+  y=7;
+}
+  return 4;
+  
+}

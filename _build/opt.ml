@@ -36,6 +36,7 @@ let rec make_context_from_vdecls (vdecls:Range.t vdecl list)(context:ctxt):((Ran
     | []->([],context)
   end
 
+
 and optimize_exp (exp: Range.t exp)(context:ctxt) : Range.t exp =
   (* print_string("WE ARE HERE: "^(string_of_exp exp)); *)
   begin match exp with
@@ -203,10 +204,17 @@ and work_stmt (stmt: Range.t stmt)(context:ctxt) : Range.t stmt*ctxt =
 	      | Fail (exp) ->   let new_exp = optimize_exp exp context in 
 				((Fail(new_exp)), context)
 	      | If (exp,stmt,stmt_opt) -> let new_exp = optimize_exp exp context in
-		                          let new_if_stmt = fst(work_stmt stmt context) in
+		                          let new_if_stmt = 
+					    begin match new_exp with
+					      | Const(Cbool(_,false))-> Ast.Fail(Const(Cstring(Range.norange,"Dead code")))
+					      | _ ->fst(work_stmt stmt context) 
+					    end in
 					  let new_else_stmt_opt = begin match stmt_opt with
 					                          | None -> None
-								  | Some so -> Some (fst(work_stmt so context))
+								  | Some so -> begin match new_exp with
+								              |  Const(Cbool(_,true))-> Some(Ast.Fail(Const(Cstring(Range.norange,"Dead code"))))
+									      | _ ->Some (fst(work_stmt so context))
+								  end
                                                                   end in
 					  (If(new_exp, new_if_stmt, new_else_stmt_opt), context)
 	      | IfNull (r,id,exp,stmt,stmt_opt) -> let new_exp = optimize_exp exp context in
@@ -278,7 +286,14 @@ let work_prog_elt (gdecl:Range.t Ast.gdecl)  : (Range.t Ast.gdecl) =
        Ast.Gfdecl (typ_opt, id, args, new_block, new_exp_opt)
     | Ast.Gefdecl gefdecl -> gdecl
       (* Don't optimize external function *)
-    | Ast.Gcdecl (cid,cid_opt,fields,ctor,fdecls) -> gdecl (*WE NEED TO FIX THIS*)
+    | Ast.Gcdecl (cid,cid_opt,fields,ctor,fdecls) -> 
+      let new_ctor = 
+	let Ctor(cid,elist) = ctor in
+	let opt_fun = fun(e) -> optimize_exp e context in 
+			  let new_elist = List.map opt_fun elist in
+			  Ctor (cid, new_elist) in
+
+      gdecl (*WE NEED TO FIX THIS*)
   end
 
 let rec work_prog  (prog:Range.t Ast.prog): (Range.t Ast.prog) =
@@ -302,16 +317,16 @@ let rec print_program (prog:Range.t Ast.prog) : unit =
 
 let opt_ast (prog:Range.t Ast.prog) : (Range.t Ast.prog) = 
   (* let context : (Range.t Ast.id * Range.t Ast.const) list = [] in *)
-  (* work_prog prog *)
+  work_prog prog
   (* print_string("\n\n\n\n\nPROGRAM: \n"^(Astlib.string_of_prog prog)^"\nEND PROGRAM\n\n"); *)
   (* print_endline("\n\n\n\nPrinting the program:\n\n\n\n"); *)
   (* print_program prog; *)
   (* print_endline("\n\n\n\nDone printing the program\n\n"); *)
-  prog
+  (* prog *)
 
 let opt_il (prog:Ll.prog) : (Ll.prog) = 
   (* currently just the identity transformation *)
-  Lllib.write_prog_to_file "not_optimized" prog;
+  Lllib.write_prog_to_file "optimized3" prog;
   prog
 
 let opt_asm (prog:Cunit.cunit) : (Cunit.cunit) = 
