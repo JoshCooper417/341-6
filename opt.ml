@@ -1,3 +1,5 @@
+open Cunit
+open X86
 open Ast
 open Astlib
 (* These flags are set by the driver to indicate which optimizations
@@ -323,6 +325,27 @@ let opt_il (prog:Ll.prog) : (Ll.prog) =
   Lllib.write_prog_to_file "optimized3" prog;
   prog
 
+let rec optimize_insns (i_list:X86.insn list):(X86.insn list) =
+  begin match i_list with
+    |h::t->
+      begin match h with 
+	|Mov(o1,o2)->if o1=o2 then optimize_insns t
+	  else h::(optimize_insns t)
+	| _->h::(optimize_insns t)
+      end
+    |[]->[]
+   end
+
+let work_cunit (comp:component):(component)=
+  begin match comp with
+    | Code block->
+      let insn_list = block.insns in
+      let new_insns = optimize_insns insn_list in
+      Code {global = block.global; label = block.label; insns = new_insns;}
+    | Data d->Data d
+  end
+
 let opt_asm (prog:Cunit.cunit) : (Cunit.cunit) = 
   (* currently just the identity transformation *)
-  prog
+  (* prog *)
+  List.map work_cunit prog
